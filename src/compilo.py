@@ -27,7 +27,7 @@ liste_var :                                                                     
 programme : "main" "(" liste_var ")" "{" commande "return" "(" expression ")" ";" "}"   -> prog_main
 """
 
-def compile(fichier:str):
+def compile(fichier:str) -> None:
     parser = lark.Lark(grammaire, start="programme")
     with open(fichier, "r") as f:
         t = parser.parse(f.read())
@@ -35,7 +35,7 @@ def compile(fichier:str):
         arguments = t.children[0]
         body = t.children[1]
         resultat = t.children[2]
-        with open("compile.asm", "w") as f:
+        with open("ressources/compile.asm", "w") as f:
             # PARTIE DECLARATION DES VARIABLES
 
             ### Fonctions externes
@@ -62,14 +62,15 @@ def compile(fichier:str):
             # PARTIE RETURN
 
             # PARTIE CLOSING
+            f.write(closing())
 
-def external_functions():
+def external_functions() -> str:
     return "extern printf, atoi\n"
 
 def main():
     return "global main\n"
 
-def variables(arguments):
+def variables(arguments) -> str:
     res = """
 section .data
 long_format: db \"%lld\", 10, 0
@@ -80,30 +81,102 @@ argv: dd 0"""
 
     return res
 
-def programme():
+def programme() -> str:
     return """
 
-        section .text
-        main:"""
+section .text
+main:"""
 
-def opening():
+def opening() -> str:
     return """
-    push rbp
-    mov [argc], rdi
-    mov [argv], rsi
+push rbp
+mov [argc], rdi
+mov [argv], rsi
     """
 
-def initialisation_variables(arguments):
+def initialisation_variables(arguments) -> str:
     res = ""
     for i, var in enumerate(arguments.children):
         res += f"""
-        mov rbx, [argv]
-        mov rdi, [rbx + 8*({i}+1)]
-        xor rax, rax
-        call atoi
-        mov [{var}], rax
-        """
+mov rbx, [argv]
+mov rdi, [rbx + 8*({i}+1)]
+xor rax, rax
+call atoi
+mov [{var}], rax
+"""
     return res
 
+def compilBody(ast) -> str:
+    pass
+
+def compilCommand(ast) -> str:
+    asmVar = ""
+    if ast.data == "com_while":
+        asmVar = compilWhile(ast[0], ast[1])
+    elif ast.data == "com_if":
+        asmVar = compilIf(ast[0], ast[1])
+    elif ast.data == "com_sequence":
+        asmVar = compilSequence(ast)
+    elif ast.data == "com_print":
+        asmVar = compilPrintf(ast)
+    elif ast.data == "com_asgt":
+        asmVar = compilAffectation(ast)
+
+def compilWhile(ast) -> str:
+    global cpt
+    cpt += 1
+    return f"""
+loop{cpt} : {compilExpression(ast.children[0].value)}
+cmp rax, 0
+jz fin{cpt}
+{compilCommand(ast.children[1].value)}
+jmp loop{cpt}
+fin{cpt} :
+"""
+
+def compilIf(ast) -> str:
+    global cpt
+    cpt += 1
+    return f"""
+{compilExpression(ast.children[0].value)}
+cmp rax, 0
+jz fin{cpt}
+{compilCommand(ast.children[1].value)}
+fin{cpt} :
+"""
+
+def compilPrintf(ast) -> str:
+    asm = f"""
+{compilExpression(ast.children[0])}
+mov rsi, rax
+mov rdi, fmt
+xor rax, rax
+call printf
+"""
+    return asm
+
+def compilAffectation(ast) -> str:
+    pass
+
+def compilExpression(ast) -> str:
+    if ast.data == "exp_variable":
+        return f"mov rax, [{ast.value}]"
+
+def compilReturn(ast) -> str:
+    return compilPrintf(ast)
+
+def compilSequence(ast) -> str:
+    asm = ""
+    for child in ast.children:
+        asm += compilCommand(child)
+    return asm
+
+def closing() -> str:
+    return """
+pop rbp
+xor rax, rax
+ret
+"""
+
 if __name__ == "__main__":
-    compile("fichier")
+    compile("ressources/fichier")
