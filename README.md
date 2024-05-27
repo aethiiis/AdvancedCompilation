@@ -15,5 +15,7 @@ Avant de commencer, assurez-vous d'avoir les outils suivants installés sur votr
 
 
 nasm -f elf64 hello.asm -o hello.o
+
 gcc -no-pie hello.o -o hello
+
 ./hello
