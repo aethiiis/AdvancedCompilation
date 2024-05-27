@@ -35,4 +35,4 @@ if __name__ == "__main__":
     ast = get_ast(get_source(sys.argv[1]))
     asm = compile(ast)
     save(asm, sys.argv[2])
-    print(ast)
+    #print(ast)

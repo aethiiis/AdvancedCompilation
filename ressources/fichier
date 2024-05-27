@@ -1,0 +1,7 @@
+main(x, x2) {
+    while(x) {
+        printf(x2 >> 13);
+        x = x + 1;
+    }
+    return(x);
+}

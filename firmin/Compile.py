@@ -2,6 +2,8 @@ import lark
 
 cpt = 0
 
+op2asm = {"+": "add rax, rbx", "-": "sub rax, rbx"}
+
 def compile(ast):
     asmString = ""
     asmString = asmString + "extern printf, atol ;déclaration des fonctions externes\n"
@@ -13,6 +15,7 @@ def compile(ast):
     asmVar, vars = variable_declaration(ast.children[0])
     asmString = asmString + asmVar
     asmString = asmString + "section .text ; instructions\n"
+    asmString += "main :"
     asmString += "push rbp; Set up the stack. Save rbp\n"
     asmString += "mov [argc], rdi\n"
     asmString += "mov [argv], rsi\n"
@@ -41,13 +44,18 @@ def initMainVar(ast):
             asmVar += "mov rbx, [argv]\n"
             asmVar += f"mov rdi, [rbx + { 8*(index+1)}]\n"
             asmVar += "xor rax, rax\n"
-            asmVar += "call atoi\n"
+            asmVar += "call atol\n"
             asmVar += f"mov [{child.value}], rax\n"
             index += 1
     return asmVar
 
 def compilReturn(ast):
-    return compilPrintf(ast)
+    asm = compilExpression(ast)
+    asm += "mov rsi, rax \n"
+    asm += "mov rdi, long_format \n"
+    asm += "xor rax, rax \n"
+    asm += "call printf \n"
+    return asm
 
 def compilCommand(ast):
     asmVar = ""
@@ -106,16 +114,16 @@ def compilPrintf(ast):
     return asm
 
 def compilExpression(ast):
-    if ast == "VARIABLE":
+    if ast.data == "exp_variable":
         return f"mov rax, [{ast.children[0].value}]\n"
-    elif ast ==  "NOMBRE":
+    elif ast.data ==  "exp_nombre":
         return f"mov rax, {ast.children[0].value}\n"
-    elif ast == "OPBINAIRE":
+    elif ast.data == "exp_binaire":
         return f"""
                 {compilExpression(ast.children[2])}
                 push rax
                 {compilExpression(ast.children[0])}
                 pop rbx
-                add rax, rbx
+                {op2asm[ast.children[1].value]}
                 """
     return ""

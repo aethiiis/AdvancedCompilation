@@ -1,4 +1,4 @@
-import lark
+import lark # type: ignore
 
 grammaire = """
 %import common.SIGNED_NUMBER
@@ -58,8 +58,10 @@ def compile(fichier:str) -> None:
             f.write(initialisation_variables(arguments))
 
             # PARTIE BODY
+            f.write(compilCommand(body))
 
             # PARTIE RETURN
+            f.write(compilReturn(resultat))
 
             # PARTIE CLOSING
             f.write(closing())
@@ -112,9 +114,9 @@ def compilBody(ast) -> str:
 def compilCommand(ast) -> str:
     asmVar = ""
     if ast.data == "com_while":
-        asmVar = compilWhile(ast[0], ast[1])
+        asmVar = compilWhile(ast)
     elif ast.data == "com_if":
-        asmVar = compilIf(ast[0], ast[1])
+        asmVar = compilIf(ast)
     elif ast.data == "com_sequence":
         asmVar = compilSequence(ast)
     elif ast.data == "com_print":
@@ -126,10 +128,10 @@ def compilWhile(ast) -> str:
     global cpt
     cpt += 1
     return f"""
-loop{cpt} : {compilExpression(ast.children[0].value)}
+loop{cpt} : {compilExpression(ast.children[0])}
 cmp rax, 0
 jz fin{cpt}
-{compilCommand(ast.children[1].value)}
+{compilCommand(ast.children[1])}
 jmp loop{cpt}
 fin{cpt} :
 """
