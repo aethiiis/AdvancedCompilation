@@ -6,8 +6,9 @@ grammaire = """
 %ignore WS
 // %ignore /[ ]/   #ignore les blancs, mais l'arbre ne contient pas l'information de leur existence. problématique du pretty printer. 
 
-VARIABLE : /[a-zA-Z_][a-zA-Z 0-9]*/
+VARIABLE : /[a-su-zA-SU-Z_][a-zA-Z0-9]*/
 NOMBRE : SIGNED_NUMBER
+TABLEAU : /[t][a-zA-Z 0-9]*/
 // NOMBRE : /[1-9][0-9]*/
 OPBINAIRE: /[+*\/&><]/|">="|"-"|">>"  //lark essaie de faire les tokens les plus long possible
 
