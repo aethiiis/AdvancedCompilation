@@ -10,6 +10,7 @@ VARIABLE : /[a-zA-Z_][a-zA-Z 0-9]*/
 NOMBRE : SIGNED_NUMBER
 // NOMBRE : /[1-9][0-9]*/
 OPBINAIRE: /[+*\/&><]/|">="|"-"|">>"  //lark essaie de faire les tokens les plus long possible
+FONCTION_NAME : /[a-zA-Z_][a-zA-Z 0-9]*/
 
 expression: VARIABLE -> exp_variable
 | NOMBRE         -> exp_nombre
@@ -20,22 +21,28 @@ commande : VARIABLE "=" expression ";"-> com_asgt //les exp entre "" ne sont pas
 | commande+ -> com_sequence
 | "while" "(" expression ")" "{" commande "}" -> com_while
 | "if" "(" expression ")" "{" commande "}" "else" "{" commande "}" -> com_if
+| VARIABLE "=" FONCTION_NAME "(" liste_var ");" -> com_appel
+
+fonction : FONCTION_NAME "(" liste_var ")" "{" commande "return" "(" expression ")" ";" "}" -> fonction
 
 liste_var :                -> liste_vide
 | VARIABLE ("," VARIABLE)* -> liste_normale
-programme : "main" "(" liste_var ")" "{" commande "return" "(" expression ")" ";" "}" -> prog_main // ressemble à une déclaration de fonction
+
+liste_fonction : fonction ("," fonction)* -> liste_fonction
+
+programme : liste_fonction -> prog // ressemble à une déclaration de fonction
 """
 
 parser = lark.Lark(grammaire, start = "programme")
 
-t = parser.parse("""main(x,y){
-                 while(x) {
-                    y = y + 1;
-                    printf(y);
-                 }
-                 return (y);
-                }
-                 """)
+# t = parser.parse("""main(x,y){
+#                  while(x) {
+#                     y = y + 1;
+#                     printf(y);
+#                  }
+#                  return (y);
+#                 }
+#                  """)
 
 def pretty_printer_liste_var(t):
     if t.data == "liste_vide" :
@@ -76,6 +83,3 @@ def pretty_print(t):
     return  "main (%s) { %s return (%s); }" % (pretty_printer_liste_var(t.children[0]), 
                                                pretty_printer_commande(t.children[1]),
                                                 pretty_printer_expression( t.children[2]))
-
-#print(pretty_print(t))
-#print(t)
