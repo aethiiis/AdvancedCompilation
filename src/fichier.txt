@@ -1,7 +1,6 @@
-main(X, Y){
-    while(X){
-        X=X-1;
-        Y=Y+1;
-    }
-    return (Y);
+main(X){
+    var t1[4];
+    var t2[4];
+    t1[3] = t1[4];
+    return (y);
 }

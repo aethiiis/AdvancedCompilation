@@ -14,6 +14,7 @@ def get_ast(file_content : str) :
     get the ast from the source code
     """
     tree = Parser.parser.parse(file_content)
+
     return tree
 
 def compile(ast) :
@@ -33,8 +34,14 @@ def save(asm, filename : str):
 
 if __name__ == "__main__":
     #ast = get_ast(get_source(sys.argv[1]))
+    t = Parser.parser.parse(get_source("fichier.txt"))
+    Parser.pretty_print(t)
     ast = get_ast(get_source("fichier.txt"))
     asm = compile(ast)
     #save(asm, sys.argv[2])
     save(asm, "compile.asm")
-    #print(ast)
+  #  print(ast.pretty())
+  
+    # print(compile(ast))
+    # print("Done")
+    pass
