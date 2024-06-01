@@ -8,7 +8,7 @@ grammaire = """
 
 VARIABLE : /[a-su-zA-SU-Z_][a-zA-Z0-9]*/
 NOMBRE : SIGNED_NUMBER
-TABLEAU : /[t][a-zA-Z 0-9]*/
+TABLEAU : /[t][a-zA-Z 0-9]*/  //rajouter la taille sinon c chiant
 // NOMBRE : /[1-9][0-9]*/
 OPBINAIRE: /[+*\/&><]/|">="|"-"|">>"  //lark essaie de faire les tokens les plus long possible
 
@@ -26,9 +26,9 @@ commande : VARIABLE "=" expression ";"-> com_asgt //les exp entre "" ne sont pas
 | "var" TABLEAU"["NOMBRE"]" ";"  -> com_decla_tableau
 | TABLEAU"["NOMBRE"]" "=" expression ";" -> com_assgt_tableau
 
-liste_var :                -> liste_vide
-| VARIABLE ("," VARIABLE)* -> liste_normale
-programme : "main" "(" liste_var ")" "{" commande "return" "(" expression ")" ";" "}" -> prog_main // ressemble à une déclaration de fonction
+liste_elmts :                -> liste_vide
+| (VARIABLE|TABLEAU) ("," (VARIABLE|TABLEAU))* -> liste_normale
+programme : "main" "(" liste_elmts ")" "{" commande "return" "(" expression ")" ";" "}" -> prog_main // ressemble à une déclaration de fonction
 """
 parser = lark.Lark(grammaire, start="programme")
 
@@ -36,12 +36,12 @@ parser = lark.Lark(grammaire, start="programme")
 
 def pretty_printer_programme(tree):
     return "main(%s) {\n %s \nreturn(%s);\n}" % (
-        pretty_printer_liste_var(tree.children[0]),
+        pretty_printer_liste_elmts(tree.children[0]),
         pretty_printer_commande(tree.children[1]),
         pretty_printer_expression(tree.children[2])
     )
 
-def pretty_printer_liste_var(tree):
+def pretty_printer_liste_elmts(tree):
     if tree.data == "liste_vide":
         return ""
     else:
