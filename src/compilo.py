@@ -1,4 +1,4 @@
-import lark
+import lark # type: ignore
 
 grammaire = """
 %import common.SIGNED_NUMBER
@@ -27,106 +27,158 @@ liste_var :                                                                     
 programme : "main" "(" liste_var ")" "{" commande "return" "(" expression ")" ";" "}"   -> prog_main
 """
 
-# def pretty_printer_programme(tree):
-#     return "main(%s) {\n %s return(%s);\n}" % (pretty_printer_liste_var(tree.children[0]), pretty_printer_commande(tree.children[1]), pretty_printer_expression(tree.children[2]))
+def compile(fichier:str) -> None:
+    parser = lark.Lark(grammaire, start="programme")
+    with open(fichier, "r") as f:
+        t = parser.parse(f.read())
+        print(t.pretty())
+        arguments = t.children[0]
+        body = t.children[1]
+        resultat = t.children[2]
+        with open("ressources/compile.asm", "w") as f:
+            # PARTIE DECLARATION DES VARIABLES
 
-# def pretty_printer_liste_var(tree):
-#     if t.data == "liste_vide":
-#         return ""
-#     else:
-#         return ", ".join([t.value for t in tree.children])
-    
-# def pretty_printer_commande(tree):
-#     if t.data == "com_asgt":
-#         f"{t.children[0].value} = {pretty_printer_expression(t.children[1])};"
-#     elif t.data == "com_print":
-#         return f"printf({pretty_printer_expression(t.children[0])});"
-#     elif t.data == "com_sequence":
-#         return "\n".join([pretty_printer_commande(c) for c in t.children])
-#     elif t.data == "com_while":
-#         return "while(%s) {\n%s}"(pretty_printer_expression(t.children[0]), pretty_printer_commande(t.children[1]))
-#     elif t.data == "com_if":
-#         return "if(" + pretty_printer_expression(t.children[0]) + ") {\n" + pretty_printer_commande(t.children[1]) + "} else {\n" + pretty_printer_commande(t.children[2]) + "}"
+            ### Fonctions externes
+            f.write(external_functions())
 
-# def pretty_printer_expression(tree):
-#     if isinstance(tree, lark.Token):
-#         return str(tree)
-#     elif t.data == "exp_variable":
-#         return t.children[0].value
-#     elif t.data == "exp_nombre":
-#         return t.children[0].value
-#     return f"{pretty_printer_expression(t.children[0])} {t.children[1].value} {pretty_printer_expression(t.children[2])}"
+            ### Main
+            f.write(main())
 
-parser = lark.Lark(grammaire, start="programme")
+            ### Variables
+            f.write(variables(arguments))
+            
+            ### Programme
+            f.write(programme())
 
-t = parser.parse("""main(x, x2) {
-                        while(x) {
-                            printf(x2 >> 13);
-                            x = x + 1;
-                        }
-                        return(x);
-                    }""")
-print(t.pretty())
+            # PARTIE OPENING
+            f.write(opening())
+            # argc = number of arguments & argv = arguments
 
-variables = t.children[0]
-print(t.children[0].pretty())
-programme = t.children[1]
-print(t.children[1].pretty())
+            # PARTIE INITIALISATION DES VARIABLES MAIN
+            f.write(initialisation_variables(arguments))
 
-with open("compile.asm", "w") as f:
-    # PARTIE DECLARATION DES VARIABLES
+            # PARTIE BODY
+            f.write(compilCommand(body))
 
-    ### Fonctions externes
-    f.write("extern printf, atoi\n")
+            # PARTIE RETURN
+            f.write(compilReturn(resultat))
 
-    ### Main
-    f.write("global main\n")
+            # PARTIE CLOSING
+            f.write(closing())
 
-    ### Variables
-    f.write("""
-            section .data
-            long_format: db \"%lld\", 10, 0
-            argc: dd 0
-            argv: dd 0
-            i: dq 0
-            liste_variables: dd 0
-            """)
-    for var in variables.children:
-        f.write(f"""{var.value}: dq 0
-                mov [{var.value}], rax
-                """)
+def external_functions() -> str:
+    return "extern printf, atoi\n"
 
-    ### Programme
-    f.write("""
-            section .text
-            main:
-            """)
+def main():
+    return "global main\n"
 
-    # PARTIE OPENING
-    f.write("""
-            push rbp
-            mov [argc], rdi
-            mov [argv], rsi
-            """)
-    # argc = number of arguments & argv = arguments
+def variables(arguments) -> str:
+    res = """
+section .data
+long_format: db \"%lld\", 10, 0
+argc: dd 0
+argv: dd 0"""
+    for i, var in enumerate(arguments.children):
+        res += f"""{var.value}: dq 0"""
 
-    # PARTIE INITIALISATION DES VARIABLES MAIN
-    f.write(f"""
-            debut_initialisation: nop
-            cmp [argc], [i]
-            je .fin_initialisation
-            mov rax, [i]
-            mov rbx, [argv]
-            mov rdi, [rbx + 8*(rax+1)]
-            inc rax
-            mov [i], rax
-            xor rax, rax
-            call atoi
-            mov [{variables.children}], rax
-            jmp debut_initialisation
-            """, )
-    # PARTIE BODY
+    return res
 
-    # PARTIE RETURN
+def programme() -> str:
+    return """
 
-    # PARTIE CLOSING
+section .text
+main:"""
+
+def opening() -> str:
+    return """
+push rbp
+mov [argc], rdi
+mov [argv], rsi
+    """
+
+def initialisation_variables(arguments) -> str:
+    res = ""
+    for i, var in enumerate(arguments.children):
+        res += f"""
+mov rbx, [argv]
+mov rdi, [rbx + 8*({i}+1)]
+xor rax, rax
+call atoi
+mov [{var}], rax
+"""
+    return res
+
+def compilBody(ast) -> str:
+    pass
+
+def compilCommand(ast) -> str:
+    asmVar = ""
+    if ast.data == "com_while":
+        asmVar = compilWhile(ast)
+    elif ast.data == "com_if":
+        asmVar = compilIf(ast)
+    elif ast.data == "com_sequence":
+        asmVar = compilSequence(ast)
+    elif ast.data == "com_print":
+        asmVar = compilPrintf(ast)
+    elif ast.data == "com_asgt":
+        asmVar = compilAffectation(ast)
+
+def compilWhile(ast) -> str:
+    global cpt
+    cpt += 1
+    return f"""
+loop{cpt} : {compilExpression(ast.children[0])}
+cmp rax, 0
+jz fin{cpt}
+{compilCommand(ast.children[1])}
+jmp loop{cpt}
+fin{cpt} :
+"""
+
+def compilIf(ast) -> str:
+    global cpt
+    cpt += 1
+    return f"""
+{compilExpression(ast.children[0].value)}
+cmp rax, 0
+jz fin{cpt}
+{compilCommand(ast.children[1].value)}
+fin{cpt} :
+"""
+
+def compilPrintf(ast) -> str:
+    asm = f"""
+{compilExpression(ast.children[0])}
+mov rsi, rax
+mov rdi, fmt
+xor rax, rax
+call printf
+"""
+    return asm
+
+def compilAffectation(ast) -> str:
+    pass
+
+def compilExpression(ast) -> str:
+    if ast.data == "exp_variable":
+        return f"mov rax, [{ast.value}]"
+
+def compilReturn(ast) -> str:
+    return compilPrintf(ast)
+
+def compilSequence(ast) -> str:
+    asm = ""
+    for child in ast.children:
+        asm += compilCommand(child)
+    return asm
+
+def closing() -> str:
+    return """
+pop rbp
+xor rax, rax
+ret
+"""
+
+if __name__ == "__main__":
+    compile("ressources/fichier")
