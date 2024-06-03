@@ -26,26 +26,32 @@ commande : -> com_vide
 
 fonction : FONCTION_NAME "(" liste_var ")" "{" commande "return" "(" expression ")" ";" "}" -> fonction
 
+fonction_main : "main" "(" liste_var ")" "{" commande "return" "(" expression ")" ";" "}" -> fonction_main
+
 liste_var :                -> liste_vide
 | VARIABLE ("," VARIABLE)* -> liste_normale
 
 liste_fonction :           -> liste_fonction_vide
 | fonction* -> liste_fonction
 
-programme : liste_fonction -> prog // ressemble à une déclaration de fonction
+programme : liste_fonction fonction_main -> prog // ressemble à une déclaration de fonction
 """
 
 parser = lark.Lark(grammaire, start = "programme")
 
-t = parser.parse("""main(x,y){
-                 while(x) {
-                    y = y + 1;
-                    printf(y);
-                 }
-                 return (y);
-                }
+t = parser.parse("""
                 fonction1(x,y){
                     return (x+y);
+                }
+                fonction2(x,y){
+                    return (x*y);
+                }
+                main(x,y){
+                while(x) {
+                   y = y + 1;
+                   printf(y);
+                }
+                return (y);
                 }
                  """)
 
@@ -95,6 +101,8 @@ def pretty_printer_fonction(t):
 def pretty_print(t):
     if t.data == "liste_fonction_vide":
         return ""
-    return  "\n".join([pretty_printer_fonction(u) for u in t.children[0].children])
+    return  "\n".join([pretty_printer_fonction(u) for u in t.children[0].children]) + "\nmain (%s) {\n%sreturn (%s);\n}" % (pretty_printer_liste_var(t.children[1].children[0]), 
+                                                                                                                        pretty_printer_commande(t.children[1].children[1]),
+                                                                                                                        pretty_printer_expression( t.children[1].children[2]))
 
 print(pretty_print(t))
