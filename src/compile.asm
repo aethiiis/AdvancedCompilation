@@ -4,7 +4,7 @@ section .data ; section des données
 long_format: db '%lld',10, 0 ; format pour les int64_t
 argc : dq 0 ; copie de argc
 argv : dq 0 ; copie de argv
-t1[4]: dq 0
+t1: dq 0,0,0,0
 Y: dq 0
 section .text ; instructions
 main :push rbp; Set up the stack. Save rbp

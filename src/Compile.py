@@ -12,6 +12,7 @@ def compile(ast):
     asmString = asmString + "long_format: db '%lld',10, 0 ; format pour les int64_t\n"
     asmString = asmString + "argc : dq 0 ; copie de argc\n"
     asmString = asmString + "argv : dq 0 ; copie de argv\n"
+    print(ast.children[0])
     asmVar, vars = variable_declaration(ast.children[0])
     asmString = asmString + asmVar
     asmString = asmString + "section .text ; instructions\n"
@@ -32,10 +33,18 @@ def variable_declaration(ast) :
     vars = set()
     if ast.data != "liste_vide":
         for child in ast.children:
-            if (child[0] != "t"):
-                asmVar += f"{child.value}: dq 0\n"
+            if (child[0] == "t"):
+                print(child)
+                position = child.find("[")+1
+                print(position)
+                varName = child[:position-1]
+                decla = "0"
+                taille = (int)(child[position])
+                for i in range (taille-1):
+                    decla += ",0"
+                asmVar += f"{varName}: dq {decla}\n"
                 vars.add(child.value)
-            elif (child[0] == "t") :
+            elif (child[0] != "t") :
                 asmVar += f"{child.value}: dq 0\n"
                 vars.add(child.value)
     return asmVar, vars
