@@ -8,14 +8,15 @@ grammaire = """
 
 VARIABLE : /[a-su-zA-SU-Z_][a-zA-Z0-9]*/
 NOMBRE : SIGNED_NUMBER
-TABLEAU : /[t][a-zA-Z 0-9]*/  //rajouter la taille sinon c chiant
+ID_TABLEAU : /[t][a-zA-Z 0-9]*/  //rajouter la taille sinon c chiant
 // NOMBRE : /[1-9][0-9]*/
 OPBINAIRE: /[+*\/&><]/|">="|"-"|">>"  //lark essaie de faire les tokens les plus long possible
+TABLEAU : ID_TABLEAU"["NOMBRE"]"
 
 expression: VARIABLE -> exp_variable
 | NOMBRE         -> exp_nombre
-| TABLEAU"["NOMBRE"]"       -> exp_tableau
-| "len" "(" TABLEAU ")"       -> exp_len_tableau
+| ID_TABLEAU"["expression"]"       -> access_table
+| "len" "(" ID_TABLEAU ")"       -> exp_len_tableau
 | expression OPBINAIRE expression -> exp_binaire
 
 commande : VARIABLE "=" expression ";"-> com_asgt //les exp entre "" ne sont pas reconnues dans l'arbre syntaxique
@@ -23,8 +24,8 @@ commande : VARIABLE "=" expression ";"-> com_asgt //les exp entre "" ne sont pas
 | commande+ -> com_sequence
 | "while" "(" expression ")" "{" commande "}" -> com_while
 | "if" "(" expression ")" "{" commande "}" "else" "{" commande "}" -> com_if
-| "var" TABLEAU"["NOMBRE"]" ";"  -> com_decla_tableau
-| TABLEAU"["NOMBRE"]" "=" expression ";" -> com_assgt_tableau
+| "var" TABLEAU ";"  -> com_decla_tableau
+| ID_TABLEAU"["NOMBRE"]" "=" expression ";" -> com_assgt_tableau
 
 liste_elmts :                -> liste_vide
 | (VARIABLE|TABLEAU) ("," (VARIABLE|TABLEAU))* -> liste_normale
@@ -59,7 +60,7 @@ def pretty_printer_commande(tree):
     elif tree.data == "com_if":
         return f"if({pretty_printer_expression(tree.children[0])}) {{\n{pretty_printer_commande(tree.children[1])}\n}} else {{\n{pretty_printer_commande(tree.children[2])}\n}}"
     elif tree.data == "com_decla_tableau":
-        return f"var {tree.children[0].value}[{tree.children[1].value}];"
+        return f"var {tree.children[0].value};"
     elif tree.data == "com_assgt_tableau":
         return f"{tree.children[0].value}[{tree.children[1].value}] = {pretty_printer_expression(tree.children[2])};"
 
@@ -70,8 +71,8 @@ def pretty_printer_expression(tree):
         return tree.children[0].value
     elif tree.data == "exp_nombre":
         return tree.children[0].value
-    elif tree.data == "exp_tableau":
-        return f"{tree.children[0].value}[{tree.children[1].value}]"
+    elif tree.data == "access_table":
+        return f"{tree.children[0].value}[{pretty_printer_expression(tree.children[1])}]"
     elif tree.data == "exp_binaire":
         return f"{pretty_printer_expression(tree.children[0])} {tree.children[1].value} {pretty_printer_expression(tree.children[2])}"
 

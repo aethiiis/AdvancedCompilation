@@ -32,21 +32,28 @@ def variable_declaration(ast) :
     vars = set()
     if ast.data != "liste_vide":
         for child in ast.children:
-            asmVar += f"{child.value}: dq 0\n"
-            vars.add(child.value)
+            if (child[0] != "t"):
+                asmVar += f"{child.value}: dq 0\n"
+                vars.add(child.value)
+            elif (child[0] == "t") :
+                asmVar += f"{child.value}: dq 0\n"
+                vars.add(child.value)
     return asmVar, vars
+
 
 def initMainVar(ast):
     asmVar = ""
     if ast.data != "liste_vide":
         index = 0
         for child in ast.children:
-            asmVar += "mov rbx, [argv]\n"
-            asmVar += f"mov rdi, [rbx + { 8*(index+1)}]\n"
-            asmVar += "xor rax, rax\n"
-            asmVar += "call atol\n"
-            asmVar += f"mov [{child.value}], rax\n"
-            index += 1
+            if (child[0] != "t"):
+                asmVar += "mov rbx, [argv]\n"
+                asmVar += f"mov rdi, [rbx + { 8*(index+1)}]\n"
+                asmVar += "xor rax, rax\n"
+                asmVar += "call atol\n"
+                asmVar += f"mov [{child.value}], rax\n"
+                index += 1
+            
     return asmVar
 
 def compilReturn(ast):
