@@ -85,7 +85,7 @@ def pretty_printer_commande(t):
         return f"{t.children[0].value}[{t.children[1].value}] = {pretty_printer_expression(t.children[2])};"
     
 def pretty_printer_fonction(t):
-    return  "%s (%s) {\n%s return (%s);\n}" % (t.children[0].value, pretty_printer_liste_var(t.children[1]), pretty_printer_commande(t.children[2]), pretty_printer_expression(t.children[3]))
+    return  "%s (%s) {\n%s\nreturn (%s);\n}" % (t.children[0].value, pretty_printer_liste_var(t.children[1]), pretty_printer_commande(t.children[2]), pretty_printer_expression(t.children[3]))
 
 def pretty_printer_main(t):
     return "main (%s) {\n%sreturn (%s);\n}" % (pretty_printer_liste_var(t.children[0]), 
@@ -94,8 +94,8 @@ def pretty_printer_main(t):
 
 def pretty_print(t):
     if t.data == "liste_fonction_vide":
-        return ""
-    return  "\n".join([pretty_printer_fonction(u) for u in t.children[0].children]) + pretty_printer_main(t.children[1])
+        return pretty_printer_main(t.children[0])
+    return  "\n".join([pretty_printer_fonction(u) for u in t.children[0].children]) + "\n" + pretty_printer_main(t.children[1])
 
 
 if __name__ == "__main__":
@@ -111,7 +111,7 @@ if __name__ == "__main__":
                 main(x,y){
                 while(x) {
                    y = y + 1;
-                   z = x + y;
+                   z = fonction1(x,y);
                    printf(z);
                 }
                 return (y);
