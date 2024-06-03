@@ -16,7 +16,8 @@ expression: VARIABLE -> exp_variable
 | NOMBRE         -> exp_nombre
 | expression OPBINAIRE expression -> exp_binaire
 
-commande : VARIABLE "=" expression ";"-> com_asgt //les exp entre "" ne sont pas reconnues dans l'arbre syntaxique
+commande : -> com_vide
+| VARIABLE "=" expression ";"-> com_asgt //les exp entre "" ne sont pas reconnues dans l'arbre syntaxique
 | "printf" "(" expression ")" ";" -> com_printf
 | commande+ -> com_sequence
 | "while" "(" expression ")" "{" commande "}" -> com_while
@@ -28,21 +29,28 @@ fonction : FONCTION_NAME "(" liste_var ")" "{" commande "return" "(" expression 
 liste_var :                -> liste_vide
 | VARIABLE ("," VARIABLE)* -> liste_normale
 
-liste_fonction : fonction ("," fonction)* -> liste_fonction
+liste_fonction :           -> liste_fonction_vide
+| fonction* -> liste_fonction
 
 programme : liste_fonction -> prog // ressemble à une déclaration de fonction
 """
 
 parser = lark.Lark(grammaire, start = "programme")
 
-# t = parser.parse("""main(x,y){
-#                  while(x) {
-#                     y = y + 1;
-#                     printf(y);
-#                  }
-#                  return (y);
-#                 }
-#                  """)
+t = parser.parse("""main(x,y){
+                 while(x) {
+                    y = y + 1;
+                    printf(y);
+                 }
+                 return (y);
+                }
+                fonction1(x,y){
+                    return (x+y);
+                }
+                 """)
+
+print(t)
+print("#################")
 
 def pretty_printer_liste_var(t):
     if t.data == "liste_vide" :
@@ -68,18 +76,25 @@ def pretty_printer_expression(t):
     return f"{pretty_printer_expression(t.children[0])} {t.children[1].value} {pretty_printer_expression(t.children[2])}"
 
 def pretty_printer_commande(t):
+    if t.data == "com_vide":
+        return ""
     if t.data == "com_asgt":
         return f"{t.children[0].value} = {pretty_printer_expression(t.children[1])} ;"
     if t.data == "com_printf":
         return f"printf ({pretty_printer_expression(t.children[0])}) ;"
     if t.data == "com_while":
-        return "while (%s){ %s}" % (pretty_printer_expression(t.children[0]), pretty_printer_commande(t.children[1]))
+        return "while (%s) {\n%s\n}\n" % (pretty_printer_expression(t.children[0]), pretty_printer_commande(t.children[1]))
     if t.data == "com_if":
         return "if (%s){ %s} else { %s}" % (pretty_printer_expression(t.children[0]), pretty_printer_commande(t.children[1]), pretty_printer_commande(t.children[2]))
     if t.data == "com_sequence":
         return "\n".join([pretty_printer_commande(u) for u in t.children])
+    
+def pretty_printer_fonction(t):
+    return  "%s (%s) {\n%s return (%s);\n}" % (t.children[0].value, pretty_printer_liste_var(t.children[1]), pretty_printer_commande(t.children[2]), pretty_printer_expression(t.children[3]))
 
 def pretty_print(t):
-    return  "main (%s) { %s return (%s); }" % (pretty_printer_liste_var(t.children[0]), 
-                                               pretty_printer_commande(t.children[1]),
-                                                pretty_printer_expression( t.children[2]))
+    if t.data == "liste_fonction_vide":
+        return ""
+    return  "\n".join([pretty_printer_fonction(u) for u in t.children[0].children])
+
+print(pretty_print(t))
