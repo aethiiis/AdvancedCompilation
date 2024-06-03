@@ -44,11 +44,6 @@ programme : liste_fonction -> prog // ressemble à une déclaration de fonction
 
 parser = lark.Lark(grammaire, start = "programme")
 
-
-
-#print(t)
-#print("#################")
-
 def pretty_printer_liste_var(tree):
     if tree.data == "liste_vide":
         return ""
@@ -60,7 +55,7 @@ def pretty_printer_commande(t):
         return f"{t.children[0].value} = {pretty_printer_expression(t.children[1])} ;"
     elif (t.data == "com_printf"):
         return f"printf ({pretty_printer_expression(t.children[0])}) ;"
-    elif (t.data == "com_sequence"):
+    elif (t.data == "com_while"):
         return "while (%s){ %s}" % (pretty_printer_expression(t.children[0]), pretty_printer_commande(t.children[1]))
     elif (t.data == "com_if"):
         return "if (%s){ %s} else { %s}" % (pretty_printer_expression(t.children[0]), pretty_printer_commande(t.children[1]), pretty_printer_commande(t.children[2]))
@@ -95,4 +90,26 @@ def pretty_print(t):
         return ""
     return  "\n".join([pretty_printer_fonction(u) for u in t.children[0].children])
 
-#print(pretty_print(t))
+
+if __name__ == "__main__":
+    t = parser.parse("""
+                fonction1(x,y){
+                    var t1[4];
+                    t1[0] = 1;
+                    return (x+y);
+                }
+                fonction2(x,y){
+                    return (x*y);
+                }
+                main(x,y){
+                while(x) {
+                   y = y + 1;
+                   z = x + y;
+                   printf(z);
+                }
+                return (y);
+                }
+                 """)
+    print(t)
+    print("#################")
+    print(pretty_print(t))
