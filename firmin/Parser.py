@@ -43,25 +43,16 @@ programme : liste_fonction -> prog // ressemble à une déclaration de fonction
 
 parser = lark.Lark(grammaire, start = "programme")
 
-t = parser.parse("""main(x,y){
-                 while(x) {
-                    y = y + 1;
-                    printf(y);
-                 }
-                 return (y);
-                }
-                fonction1(x,y){
-                    return (x+y);
-                }
-                 """)
 
-print(t)
-print("#################")
 
-def pretty_printer_liste_var(t):
-    if t.data == "liste_vide" :
+#print(t)
+#print("#################")
+
+def pretty_printer_liste_var(tree):
+    if tree.data == "liste_vide":
         return ""
-    return ", ".join([u.value for u in t.children])
+    else:
+        return ", ".join([t.value for t in tree.children])
 
 def pretty_printer_commande(t):
     if (t.data == "com_asgt"):
@@ -77,28 +68,30 @@ def pretty_printer_commande(t):
     elif t.data == "com_decla_tableau":
         return f"var {t.children[0].value};"
     elif t.data == "com_assgt_tableau":
-        return f"{t.children[0].value}[{t.children[1].value}] = {pretty_printer_expression(tree.children[2])};"
+        return f"{t.children[0].value}[{t.children[1].value}] = {pretty_printer_expression(t.children[2])};"
     
 
 def pretty_printer_expression(t):
-    if isinstance(tree, lark.Token):
-        return str(tree)
-    elif tree.data == "exp_variable":
-        return tree.children[0].value
-    elif tree.data == "exp_nombre":
-        return tree.children[0].value
-    elif tree.data == "access_table":
-        return f"{tree.children[0].value}[{pretty_printer_expression(tree.children[1])}]"
-    elif tree.data == "exp_binaire":
-        return f"{pretty_printer_expression(tree.children[0])} {tree.children[1].value} {pretty_printer_expression(tree.children[2])}"
+    if isinstance(t, lark.Token):
+        return str(t)
+    elif t.data == "exp_variable":
+        return t.children[0].value
+    elif t.data == "exp_nombre":
+        return t.children[0].value
+    elif t.data == "access_table":
+        return f"{t.children[0].value}[{pretty_printer_expression(t.children[1])}]"
+    elif t.data == "exp_binaire":
+        return f"{pretty_printer_expression(t.children[0])} {t.children[1].value} {pretty_printer_expression(t.children[2])}"
 
     
 def pretty_printer_fonction(t):
     return  "%s (%s) {\n%s return (%s);\n}" % (t.children[0].value, pretty_printer_liste_var(t.children[1]), pretty_printer_commande(t.children[2]), pretty_printer_expression(t.children[3]))
+
+
 
 def pretty_print(t):
     if t.data == "liste_fonction_vide":
         return ""
     return  "\n".join([pretty_printer_fonction(u) for u in t.children[0].children])
 
-print(pretty_print(t))
+#print(pretty_print(t))
