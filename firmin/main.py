@@ -33,6 +33,16 @@ def save(asm, filename : str):
     pass
 
 if __name__ == "__main__":
-    ast = get_ast(get_source(sys.argv[1]))
-    asm = compile(ast)
-    save(asm, sys.argv[2])
+    #ast = get_ast(get_source(sys.argv[1]))
+    t = Parser.parser.parse(get_source("fichier.txt"))
+    Parser.pretty_print(t)
+
+    ast = get_ast(get_source("fichier.txt"))
+  #  asm = compile(ast)
+    #save(asm, sys.argv[2])
+  #  save(asm, "compile.asm")
+  #  print(ast.pretty())
+  
+    # print(compile(ast))
+    # print("Done")
+    pass

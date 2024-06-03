@@ -20,6 +20,7 @@ expression: VARIABLE -> exp_variable
 | ID_TABLEAU"["expression"]"       -> access_table
 | "len" "(" ID_TABLEAU ")"       -> exp_len_tableau
 
+
 commande : -> com_vide
 | VARIABLE "=" expression ";"-> com_asgt //les exp entre "" ne sont pas reconnues dans l'arbre syntaxique
 | "printf" "(" expression ")" ";" -> com_printf
