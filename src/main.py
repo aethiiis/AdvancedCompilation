@@ -41,7 +41,8 @@ if __name__ == "__main__":
     asm = compile(ast)
     #save(asm, sys.argv[2])
     save(asm, "compile.asm")
-  #  print(ast.pretty())
+   # print(ast.pretty())
+    
   
     # print(compile(ast))
     # print("Done")

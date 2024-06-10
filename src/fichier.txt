@@ -1,7 +1,8 @@
-main(t1[4], Y){
-    X = 1;
-    var t1[4];
-    var t2[4];
-    t1[3] = t1[4];
-    return (y);
+main(){
+    var t1[3];
+    var t2[4] ;
+    var t3[2] = [3,18];
+    x = t3[0];
+    
+    return (x);
 }

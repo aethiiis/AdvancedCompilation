@@ -11,7 +11,7 @@ NOMBRE : SIGNED_NUMBER
 ID_TABLEAU : /[t][a-zA-Z 0-9]*/  //rajouter la taille sinon c chiant
 // NOMBRE : /[1-9][0-9]*/
 OPBINAIRE: /[+*\/&><]/|">="|"-"|">>"  //lark essaie de faire les tokens les plus long possible
-TABLEAU : ID_TABLEAU"["NOMBRE"]"
+TABLEAU : ID_TABLEAU"["NOMBRE"]" | "["NOMBRE ("," NOMBRE)*"]" | "[" "]"
 
 expression: VARIABLE -> exp_variable
 | NOMBRE         -> exp_nombre
@@ -24,7 +24,7 @@ commande : VARIABLE "=" expression ";"-> com_asgt //les exp entre "" ne sont pas
 | commande+ -> com_sequence
 | "while" "(" expression ")" "{" commande "}" -> com_while
 | "if" "(" expression ")" "{" commande "}" "else" "{" commande "}" -> com_if
-| "var" TABLEAU ";"  -> com_decla_tableau
+| "var" TABLEAU ("=" TABLEAU)? ";"  -> com_decla_tableau
 | ID_TABLEAU"["NOMBRE"]" "=" expression ";" -> com_assgt_tableau
 
 liste_elmts :                -> liste_vide
@@ -60,7 +60,12 @@ def pretty_printer_commande(tree):
     elif tree.data == "com_if":
         return f"if({pretty_printer_expression(tree.children[0])}) {{\n{pretty_printer_commande(tree.children[1])}\n}} else {{\n{pretty_printer_commande(tree.children[2])}\n}}"
     elif tree.data == "com_decla_tableau":
-        return f"var {tree.children[0].value};"
+
+        try :
+            return f"var {tree.children[0].value} = {tree.children[1].value};"
+        except Exception as e: 
+            return f"var {tree.children[0].value};"
+
     elif tree.data == "com_assgt_tableau":
         return f"{tree.children[0].value}[{tree.children[1].value}] = {pretty_printer_expression(tree.children[2])};"
 
