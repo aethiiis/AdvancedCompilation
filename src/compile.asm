@@ -13,7 +13,10 @@ main :
 push rbp; Set up the stack. Save rbp
 mov rbp, rsp; Set up the stack. Set rbp to rbpmov [argc], rdi
 mov [argv], rsi
-lea rsi, [t3]
+mov rax, 1
+lea rsi, [t2]
+mov qword [rsi], rax
+lea rsi, [t2]
 mov rax, [rsi + 0 ]
 mov [x], rax 
 mov rax, [x]
