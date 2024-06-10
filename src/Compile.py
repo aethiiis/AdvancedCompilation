@@ -193,10 +193,7 @@ def compilAssgtTableau(ast):
     asm = ""
     asm = compilExpression(ast.children[2])
     asm += f"lea rsi, [{ast.children[0]}]\n"
-    asm += f"mov qword ptr [rsi], rax\n"
-    print(ast.children[0])
-    print(ast.children[1])
-    print(ast.children[2])
+    asm += f"mov qword [rsi], rax\n"
     return asm
 
 def compilPrintf(ast):
