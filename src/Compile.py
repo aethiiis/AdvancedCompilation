@@ -52,6 +52,7 @@ def variable_declaration(ast) :
                 for i in range (taille-1):
                     decla += ",0"
                 asmVar += f"{varName}: dq {decla}\n"
+                asmVar+= f"{varName}_size : dq {taille}\n"
                 vars.add(child.value)
             elif (child[0] == "["):
                 tableau = eval(child)
@@ -83,6 +84,7 @@ def localVariables(ast):
 
             asm = asm[:-2]
             asmString += f"{asm}\n"
+            asmString+= f"{varName}_size : dq {ext_table}\n"
         except Exception as e :
             position = ast.children[0].find("[")-1
             varName = ast.children[0][:position+1]
@@ -93,7 +95,7 @@ def localVariables(ast):
             for i in range (taille-1):
                 asm += ",0"
             asmString += f"{asm}\n"
-
+            asmString+= f"{varName}_size : dq {taille}\n"
     elif(ast.data == ("com_asgt")):
         asmString += f"{ast.children[0]} : dq 0\n"  
     return asmString
@@ -222,6 +224,11 @@ def compilExpression(ast):
         print(array_name)
         index = (int)(ast.children[1].children[0]) 
         asm = f"mov rax, [{array_name} + {8*index} ]\n"
+        return asm
+
+    elif ast.data == "exp_len_tableau" :
+        name = ast.children[0].value
+        asm = f"mov rax, [{name}_size]\n"
         return asm
 
     return ""
