@@ -192,8 +192,7 @@ def compilAsgt(ast):
 def compilAssgtTableau(ast):
     asm = ""
     asm = compilExpression(ast.children[2])
-    asm += f"lea rsi, [{ast.children[0]}]\n"
-    asm += f"mov qword [rsi], rax\n"
+    asm += f"mov [{ast.children[0]} + {8*(int)(ast.children[1])}], rax\n"
     return asm
 
 def compilPrintf(ast):
@@ -218,11 +217,11 @@ def compilExpression(ast):
                 {op2asm[ast.children[1].value]}
                 """
     elif ast.data == "access_table" :
+        
         array_name = ast.children[0].value
-      #  print(array_name)
-        asm = f"lea rsi, [{array_name}]\n"
-        index = (int)(ast.children[1].children[0])
-        asm += f"mov rax, [rsi + {8*index} ]\n"
+        print(array_name)
+        index = (int)(ast.children[1].children[0]) 
+        asm = f"mov rax, [{array_name} + {8*index} ]\n"
         return asm
 
     return ""
