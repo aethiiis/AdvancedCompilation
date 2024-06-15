@@ -24,7 +24,7 @@ def compile(ast):
     asmString = asmString + "section .text ; instructions\n"
     asmString += "main :\n"
     asmString += "push rbp; Set up the stack. Save rbp\n"
-    asmString += "mov rbp, rsp; Set up the stack. Set rbp to rbp"
+    asmString += "mov rbp, rsp; Set up the stack. Set rbp to rbp\n"
     asmString += "mov [argc], rdi\n"
     asmString += "mov [argv], rsi\n"
     asmString += initMainVar(ast.children[0])
