@@ -8,7 +8,7 @@ grammaire = """
 
 VARIABLE : /[a-su-zA-SU-Z_][a-zA-Z0-9]*/
 NOMBRE : SIGNED_NUMBER
-ID_TABLEAU : /[t][a-zA-Z 0-9]*/  //rajouter la taille sinon c chiant
+ID_TABLEAU : /[t][a-zA-Z 0-9]*/  
 // NOMBRE : /[1-9][0-9]*/
 OPBINAIRE: /[+*\/&><]/|">="|"-"|">>"  //lark essaie de faire les tokens les plus long possible
 TABLEAU : ID_TABLEAU"["NOMBRE"]" | "["NOMBRE ("," NOMBRE)*"]" | "[" "]"
@@ -69,6 +69,7 @@ def pretty_printer_commande(tree):
     elif tree.data == "com_assgt_tableau":
         return f"{tree.children[0].value}[{tree.children[1].value}] = {pretty_printer_expression(tree.children[2])};"
 
+
 def pretty_printer_expression(tree):
     if isinstance(tree, lark.Token):
         return str(tree)
@@ -78,6 +79,8 @@ def pretty_printer_expression(tree):
         return tree.children[0].value
     elif tree.data == "access_table":
         return f"{tree.children[0].value}[{pretty_printer_expression(tree.children[1])}]"
+    elif tree.data == "exp_len_tableau" :
+        return f"len({pretty_printer_expression(tree.children[0])})"
     elif tree.data == "exp_binaire":
         return f"{pretty_printer_expression(tree.children[0])} {tree.children[1].value} {pretty_printer_expression(tree.children[2])}"
 
