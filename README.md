@@ -15,5 +15,7 @@ Avant de commencer, assurez-vous d'avoir les outils suivants installés sur votr
 
 
 nasm -f elf64 compile.asm -o compile.o
+
 gcc -no-pie compile.o -o main
+
 ./main
