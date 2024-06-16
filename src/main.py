@@ -37,13 +37,8 @@ if __name__ == "__main__":
     t = Parser.parser.parse(get_source(sys.argv[1]))
     Parser.pretty_print(t)
 
-    ast = get_ast(get_source("./test/exemple1.txt"))
     asm = compile(ast)
     save(asm, sys.argv[2])
+  #  compile(ast)
 
-   # print(ast.pretty())
-    
-  
-    # print(compile(ast))
-    # print("Done")
     pass
