@@ -84,7 +84,7 @@ def localVariables(ast):
 
             asm = asm[:-2]
             asmString += f"{asm}\n"
-            asmString+= f"{varName}_size : dq {ext_table}\n"
+            asmString+= f"{varName}_size : dq {len(ext_table)}\n"
         except Exception as e :
             position = ast.children[0].find("[")-1
             varName = ast.children[0][:position+1]
@@ -104,7 +104,7 @@ def initMainVar(ast):
     asmVar = ""
    # print("balba")
     if ast.data != "liste_vide":
-        print("balba1")
+       # print("balba1")
         index = 0
         for child in ast.children:
             if (child[0] == "t"):
@@ -121,7 +121,7 @@ def initMainVar(ast):
             elif (child[0] == "["):
                 tableau = eval(child)
             else:
-                print("balba3")
+              #  print("balba3")
                 asmVar += "mov rbx, [argv]\n"
                 asmVar += f"mov rdi, [rbx + { 8*(index+1)}]\n"
                 asmVar += "xor rax, rax\n"
@@ -221,7 +221,7 @@ def compilExpression(ast):
     elif ast.data == "access_table" :
         
         array_name = ast.children[0].value
-        print(array_name)
+     #   print(array_name)
         index = (int)(ast.children[1].children[0]) 
         asm = f"mov rax, [{array_name} + {8*index} ]\n"
         return asm
