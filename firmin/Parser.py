@@ -6,7 +6,7 @@ grammaire = """
 %ignore WS
 // %ignore /[ ]/   #ignore les blancs, mais l'arbre ne contient pas l'information de leur existence. problématique du pretty printer. 
 
-VARIABLE : /[a-zA-Z_][a-zA-Z 0-9]*/
+VARIABLE : /[a-zA-Z_][a-zA-Z0-9]*/
 NOMBRE : SIGNED_NUMBER
 // NOMBRE : /[1-9][0-9]*/
 OPBINAIRE: /[+*\/&><]/|">="|"-"|">>"  //lark essaie de faire les tokens les plus long possible
@@ -15,6 +15,7 @@ ID_TABLEAU : /[t][a-zA-Z 0-9]*/
 TABLEAU : ID_TABLEAU"["NOMBRE"]"
 
 expression: VARIABLE -> exp_variable
+| TABLEAU -> exp_tableau
 | NOMBRE         -> exp_nombre
 | expression OPBINAIRE expression -> exp_binaire
 | ID_TABLEAU"["expression"]"       -> access_table
@@ -36,7 +37,7 @@ fonction : FONCTION_NAME "(" liste_var ")" "{" commande "return" "(" expression 
 fonction_main : "main" "(" liste_var ")" "{" commande "return" "(" expression ")" ";" "}" -> fonction_main
 
 liste_var :                -> liste_vide
-| (VARIABLE|TABLEAU) ("," (VARIABLE|TABLEAU))* -> liste_normale
+| (expression) ("," (expression))* -> liste_normale
 
 liste_fonction :           -> liste_fonction_vide
 | fonction* -> liste_fonction
@@ -50,7 +51,7 @@ def pretty_printer_liste_var(tree):
     if tree.data == "liste_vide":
         return ""
     else:
-        return ", ".join([t.value for t in tree.children])    
+        return ", ".join([t.children[0].value for t in tree.children])    
 
 def pretty_printer_expression(t):
     if isinstance(t, lark.Token):
@@ -85,7 +86,7 @@ def pretty_printer_commande(t):
         return f"{t.children[0].value}[{t.children[1].value}] = {pretty_printer_expression(t.children[2])};"
     
 def pretty_printer_fonction(t):
-    return  "%s (%s) {\n%s\nreturn (%s);\n}" % (t.children[0].value, pretty_printer_liste_var(t.children[1]), pretty_printer_commande(t.children[2]), pretty_printer_expression(t.children[3]))
+    return  "%s (%s) {\n%s\nreturn (%s);\n}" % (t.children[0].value, pretty_printer_expression(t.children[1]), pretty_printer_commande(t.children[2]), pretty_printer_expression(t.children[3]))
 
 def pretty_printer_main(t):
     return "main (%s) {\n%sreturn (%s);\n}" % (pretty_printer_liste_var(t.children[0]), 
