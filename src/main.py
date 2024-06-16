@@ -34,10 +34,10 @@ def save(asm, filename : str):
 
 if __name__ == "__main__":
     #ast = get_ast(get_source(sys.argv[1]))
-    t = Parser.parser.parse(get_source("./test/exemple2.txt"))
+    t = Parser.parser.parse(get_source("./test/exemple1.txt"))
     Parser.pretty_print(t)
 
-    ast = get_ast(get_source("./test/exemple2.txt"))
+    ast = get_ast(get_source("./test/exemple1.txt"))
     asm = compile(ast)
     #save(asm, sys.argv[2])
     save(asm, "compile.asm")
