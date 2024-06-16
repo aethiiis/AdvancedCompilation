@@ -17,3 +17,5 @@ nasm -f elf64 compile.asm -o compile.o
 gcc -no-pie compile.o -o main
 
 ./main
+
+Le cas écheant, on insère les arguments à la suite du ./main
