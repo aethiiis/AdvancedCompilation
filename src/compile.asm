@@ -18,11 +18,16 @@ mov rax, [t1 + 8 ]
 mov [x], rax 
 mov rax, [t1 + 0 ]
 mov [y], rax 
+mov rax, [x]
 mov rsi, rax 
 mov rdi, long_format 
 xor rax, rax 
 call printf 
-mov rax, [Tree('exp_variable', [Token('VARIABLE', 'x')])]
+mov rax, [y]
+mov rsi, rax 
+mov rdi, long_format 
+xor rax, rax 
+call printf 
 pop rbp
 xor rax, rax
 ret

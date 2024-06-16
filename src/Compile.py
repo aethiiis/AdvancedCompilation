@@ -131,12 +131,13 @@ def initMainVar(ast):
     return asmVar
 
 def compilReturn(ast):
-    asm = compilExpression(ast)
-    asm += "mov rsi, rax \n"
-    asm += "mov rdi, long_format \n"
-    asm += "xor rax, rax \n"
-    asm += "call printf \n"
-    asm += f"mov rax, [{ast.children[0]}]\n"
+    asm = ""
+    for child in ast.children :
+        asm += compilExpression(child)
+        asm += "mov rsi, rax \n"
+        asm += "mov rdi, long_format \n"
+        asm += "xor rax, rax \n"
+        asm += "call printf \n"
     return asm
 
 def compilCommand(ast):
@@ -204,6 +205,8 @@ def compilPrintf(ast):
     asm += "xor rax, rax \n"
     asm += "call printf \n"
     return asm
+
+
 
 def compilExpression(ast):
     if ast.data == "exp_variable":
