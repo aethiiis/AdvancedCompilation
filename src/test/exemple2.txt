@@ -2,5 +2,5 @@ main(){
     var t1[2] = [3,18]; 
     x = t1[1];
     y = t1[0];
-    return (y);
+    return (x,y);
 }

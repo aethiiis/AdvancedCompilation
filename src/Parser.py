@@ -29,7 +29,11 @@ commande : VARIABLE "=" expression ";"-> com_asgt //les exp entre "" ne sont pas
 
 liste_elmts :                -> liste_vide
 | (VARIABLE|TABLEAU) ("," (VARIABLE|TABLEAU))* -> liste_normale
-programme : "main" "(" liste_elmts ")" "{" commande "return" "(" expression ")" ";" "}" -> prog_main // ressemble à une déclaration de fonction
+
+list_expression : -> list_vide_expression
+| expression(","expression)* -> liste_normale_expression
+
+programme : "main" "(" liste_elmts ")" "{" commande "return" "(" list_expression ")" ";" "}" -> prog_main // ressemble à une déclaration de fonction
 """
 parser = lark.Lark(grammaire, start="programme")
 
@@ -39,8 +43,19 @@ def pretty_printer_programme(tree):
     return "main(%s) {\n %s \nreturn(%s);\n}" % (
         pretty_printer_liste_elmts(tree.children[0]),
         pretty_printer_commande(tree.children[1]),
-        pretty_printer_expression(tree.children[2])
+        pretty_printer_list_expression(tree.children[2])
     )
+
+def pretty_printer_list_expression(tree):
+    if tree.data == "liste_vide_expression":
+        return ""
+    else:
+        char = ""
+        for child in tree.children :
+         
+            char += f"{child.children[0]},"
+        char = char[:-1]
+    return char
 
 def pretty_printer_liste_elmts(tree):
     if tree.data == "liste_vide":
