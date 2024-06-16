@@ -9,8 +9,6 @@ Avant de commencer, assurez-vous d'avoir les outils suivants installés sur votr
 1. **NASM** : Assembleur pour le langage assembleur x86.
 2. **GCC** : Collection de compilateurs pour divers langages de programmation, y compris le C.
 
-### Installation de NASM et GCC
-
 #### Sur Ubuntu / Debian
 
 
