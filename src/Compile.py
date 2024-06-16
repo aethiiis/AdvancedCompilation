@@ -224,7 +224,6 @@ def compilExpression(ast):
     elif ast.data == "access_table" :
         
         array_name = ast.children[0].value
-     #   print(array_name)
         index = (int)(ast.children[1].children[0]) 
         asm = f"mov rax, [{array_name} + {8*index} ]\n"
         return asm

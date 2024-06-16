@@ -52,8 +52,13 @@ def pretty_printer_list_expression(tree):
     else:
         char = ""
         for child in tree.children :
-         
-            char += f"{child.children[0]},"
+            
+            if (child.data == "access_table") : 
+                char += f"{child.children[0]}[{child.children[1].children[0]}],"
+            elif (child.data == "exp_variable" or child.data ==  "exp_nombre") : 
+                char += f"{child.children[0]},"
+            elif (child.data == "exp_len_tableau") :
+                char += f"len({child.children[0]}),"
         char = char[:-1]
     return char
 
