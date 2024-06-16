@@ -13,8 +13,8 @@ Avant de commencer, assurez-vous d'avoir les outils suivants installés sur votr
 ## Générer le fichier assembleur
 
 Pour générer le fichier assembleur, il suffit d'exécuter le fichier main.py suivi de 
-[] le chemin relatif du fichier que l'on veut parser (par exemple : ./test/exemple1.txt si l'on se trouve dans src)
-[] le chemin relatif du fichier où l'on veut générer le code assembleur (par exemple : compile.asm)
+1. le chemin relatif du fichier que l'on veut parser (par exemple : ./test/exemple1.txt si l'on se trouve dans src)
+2. le chemin relatif du fichier où l'on veut générer le code assembleur (par exemple : compile.asm)
 
 
 ## Compiler le fichier assembleur
