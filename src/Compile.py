@@ -39,7 +39,6 @@ def compile(ast):
     asmString += "ret\n"
 
     analyze_variables(ast)  # Perform the preliminary analysis
-    print(variables)
 
     for function in ast.children[0].children:
         asmString += compile_function(function)
@@ -52,7 +51,6 @@ def analyze_variables(ast):
 
     # Regular functions
     for func in ast.children[0].children:
-        #print(func.pretty())
         func_name = func.children[0].value
         func_vars = {}
         index = 1
@@ -66,7 +64,6 @@ def analyze_variables(ast):
         variables[func_name] = func_vars
     
     # Main function
-    print(ast.children[1].children[1])
     func_name = "main"
     func_vars = {}
     index = 1
