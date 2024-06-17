@@ -10,7 +10,7 @@ variables = {}
 def compile(ast):
     asmString = ""
     asmString += "extern printf, atol ;déclaration des fonctions externes\n"
-    asmString += "global start ; entry point\n"
+    asmString += "global _start ; entry point\n"
     asmString += "section .data ; section des données\n"
     asmString += "long_format: db '%lld',10, 0 ; format pour les int64_t\n"
     asmString += "argc : dq 0 ; copie de argc\n"
@@ -19,7 +19,7 @@ def compile(ast):
     #asmString += variable_declaration(ast) # variables globales
 
     asmString += "section .text ; instructions\n"
-    asmString += "start:\n"
+    asmString += "_start:\n"
     asmString += "push rbp\n"
     asmString += "mov rbp, rsp\n"
     asmString += "mov [argc], rdi\n"
