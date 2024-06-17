@@ -86,7 +86,7 @@ def pretty_printer_commande(t):
         return f"{t.children[0].value}[{t.children[1].value}] = {pretty_printer_expression(t.children[2])};"
     
 def pretty_printer_fonction(t):
-    return  "%s (%s) {\n%s\nreturn (%s);\n}" % (t.children[0].value, pretty_printer_expression(t.children[1]), pretty_printer_commande(t.children[2]), pretty_printer_expression(t.children[3]))
+    return  "%s (%s) {\n%s\nreturn (%s);\n}" % (t.children[0].value, pretty_printer_liste_var(t.children[1]), pretty_printer_commande(t.children[2]), pretty_printer_expression(t.children[3]))
 
 def pretty_printer_main(t):
     return "main (%s) {\n%sreturn (%s);\n}" % (pretty_printer_liste_var(t.children[0]), 
